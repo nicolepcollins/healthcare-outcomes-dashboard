@@ -1,0 +1,206 @@
+---
+title: "Data Understanding And Cleaning"
+author: "Nicole P. Collins"
+date: "2025-06-06"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 3    
+    number_sections: false
+    theme: cerulean   
+    
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+# Introduction
+
+This project involves cleaning and preparing a comprehensive healthcare dataset containing patient demographic information, medical conditions, admission details, and billing data. The raw dataset includes 55,500 patient records with 15 variables collected from multiple hospitals.
+
+The objective of this analysis is to transform the raw data into a clean, consistent, and analysis-ready format, suitable for further exploration and visualization in Tableau. Key data challenges addressed include:
+
+- Inconsistent text capitalization in categorical fields such as patient names and gender.
+- Conversion of date fields to proper date formats to enable time-based analyses.
+- Handling of duplicate records and missing data to ensure dataset integrity.
+- Creation of derived variables to enhance the analytical value, including length of stay and age groups.
+
+By completing this preprocessing step in R, this project demonstrates strong data wrangling skills, reproducible coding practices, and lays the foundation for advanced analytics and interactive dashboards in Tableau aimed at improving healthcare insights and decision-making.
+
+## Step 1.1 Setting up my environment 
+
+Ensuring my paths are clean
+
+### Load CSV
+
+```{r load csv}
+health_data <- read.csv("data/raw/healthcare_dataset.csv")
+
+```
+
+### Check shape
+
+```{r check shape}
+dim(health_data)
+```
+
+### Check column names
+
+```{r column names}
+colnames(health_data)
+```
+
+### Preview data
+
+```{r preview data}
+head(health_data)
+```
+
+## Step 1.2 Data Summary & Scoping
+
+Objective: 
+
+  * Understand column types & values
+  * Check for weird/missing values
+  * Finalize which columns will be used in the dashboard
+  
+### Summary of statistics of all columns 
+
+```{r summary}
+summary(health_data)
+```
+
+### Check for missing values 
+
+```{r missing values}
+colSums(is.na(health_data))
+```
+
+### Understanding data types 
+
+```{r data types}
+str(health_data)
+```
+## Step 2.1: Data Cleaning and Preparation
+
+### Load Libraries
+```{r libraries}
+library(dplyr)
+library(lubridate)
+```
+
+### Start with loaded data 
+```{r loaded data}
+health_data_clean <- health_data %>%
+  
+  # 1. Fix case inconsistencies for Name and Gender
+  mutate(
+    Name = tools::toTitleCase(tolower(Name)),
+    Gender = case_when(
+      tolower(Gender) %in% c("male", "m") ~ "Male",
+      tolower(Gender) %in% c("female", "f") ~ "Female",
+      TRUE ~ Gender
+    )
+  ) %>%
+  
+  # 2. Convert relevant columns to factors
+  mutate(
+    Gender = as.factor(Gender),
+    Blood.Type = as.factor(Blood.Type),
+    Medical.Condition = as.factor(Medical.Condition),
+    Doctor = as.factor(Doctor),
+    Hospital = as.factor(Hospital),
+    Insurance.Provider = as.factor(Insurance.Provider),
+    Admission.Type = as.factor(Admission.Type),
+    Medication = as.factor(Medication),
+    Test.Results = as.factor(Test.Results)
+  ) %>%
+  
+  # 3. Convert Date columns to Date type
+  mutate(
+    Date.of.Admission = as.Date(Date.of.Admission, format = "%Y-%m-%d"),
+    Discharge.Date = as.Date(Discharge.Date, format = "%Y-%m-%d")
+  ) %>%
+  
+  # 4. Remove duplicate rows if any
+  distinct()
+```
+```{r gender conflict}
+# Check for conflicting gender entries by Name
+conflicting_gender <- health_data_clean %>%
+  group_by(Name) %>%
+  summarize(gender_count = n_distinct(Gender)) %>%
+  filter(gender_count > 1)
+
+conflicting_gender_names <- conflicting_gender$Name
+
+# View conflicts
+length(conflicting_gender_names)
+head(conflicting_gender)
+```
+```{r gender fix}
+# Resolve conflicting gender entries
+gender_fix <- health_data_clean %>%
+  group_by(Name, Gender) %>%
+  summarize(count = n(), .groups = "drop") %>%
+  group_by(Name) %>%
+  slice_max(count, n = 1, with_ties = FALSE) %>%
+  select(Name, Gender)
+
+health_data_clean <- health_data_clean %>%
+  select(-Gender) %>%
+  left_join(gender_fix, by = "Name") %>%
+  
+  # Final deduplication
+  distinct()
+```
+
+
+## Step 2.2 Feature Engineering
+
+### Add Length of Stay (days between admission and discharge)
+
+```{r length of stay}
+health_data_clean <- health_data_clean %>%
+  mutate(Length.of.Stay = as.numeric(Discharge.Date - Date.of.Admission))
+```
+
+### Create Age Group
+
+```{r age group}
+health_data_clean <- health_data_clean %>%
+  mutate(Age.Group = cut(Age,
+                         breaks = c(0, 18, 35, 50, 65, Inf),
+                         labels = c("Child", "Young Adult", "Adult", "Senior Adult", "Elderly")))
+```
+
+## Step 3: Export Clean Data for Tableau
+
+```{r export}
+write.csv(health_data_clean, "data/processed/health_data_clean.csv", row.names = FALSE)
+```
+
+### Conclusion and Next Steps
+
+In this project, I performed a thorough data cleaning and preprocessing workflow on a large healthcare dataset (55,500 records, 15 variables). Key data cleaning steps included:
+
+- Standardizing inconsistent text cases in patient names and gender entries.
+- Converting relevant categorical variables to factors for efficient analysis.
+- Parsing date columns to proper date formats for time-series analysis.
+- Removing duplicate records to ensure data integrity.
+- Creating new derived variables such as *Length of Stay* and *Age Group* to enhance analytical insights.
+- Verifying that missing data was appropriately handled with no remaining NA values in critical fields.
+
+These steps ensure the dataset is analysis-ready and robust for downstream exploration.
+
+### Next Steps:
+
+- Export the cleaned data for visualization and further analysis.
+- Develop an interactive Tableau dashboard to explore patient demographics, medical conditions, billing, and admission trends.
+- Utilize filters and visualizations to enable stakeholders to uncover insights such as average length of stay, billing amounts by condition, and admission patterns over time.
+- Extend the analysis by integrating additional clinical outcomes or external datasets if available.
+- Document and publish the complete workflow in a public repository with clear README files to showcase reproducible data analytics skills.
+
+---
+

@@ -1,0 +1,27 @@
+{
+    "id": "FD4230ED",
+    "path": "~/Desktop/DA Portfolio/healthcare-outcomes-dashboard/notebooks/01/data-understanding-and-cleaning.Rmd",
+    "project_path": "data-understanding-and-cleaning.Rmd",
+    "type": "r_markdown",
+    "hash": "740728553",
+    "contents": "",
+    "dirty": false,
+    "created": 1749479889905.0,
+    "source_on_save": false,
+    "relative_order": 1,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "39,0",
+        "scrollLine": "22",
+        "last_setup_crc32": "a8b6a5e2bb338d19"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1749492415,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1749492436090,
+    "read_only": false,
+    "read_only_alternatives": []
+}

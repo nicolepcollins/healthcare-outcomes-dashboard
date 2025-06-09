@@ -1,0 +1,7 @@
+"0","colnames(health_data)
+"
+"1"," [1] ""Name""               ""Age""                ""Gender""             ""Blood.Type""        
+ [5] ""Medical.Condition""  ""Date.of.Admission""  ""Doctor""             ""Hospital""          
+ [9] ""Insurance.Provider"" ""Billing.Amount""     ""Room.Number""        ""Admission.Type""    
+[13] ""Discharge.Date""     ""Medication""         ""Test.Results""      
+"

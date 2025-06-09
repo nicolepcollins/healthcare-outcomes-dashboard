@@ -1,0 +1,9 @@
+"0","health_data <- read.csv(""data/raw/healthcare_dataset.csv"")
+"
+"2","G2;H2;Warningh in file(file, ""rt"") :
+  cannot open file 'data/raw/healthcare_dataset.csv': No such file or directoryg
+"
+"2","G1;H1;Errorh in file(file, ""rt"") : cannot open the connection
+Error during wrapup: not that many frames on the stack
+Error: no more error handlers available (recursive errors?); invoking 'abort' restart
+g"
